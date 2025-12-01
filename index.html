@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الروبي | للموارد البشرية</title>
+    
+    <!-- خطوط وأيقونات -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- مكتبة الإكسيل -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        :root {
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --primary: #3498db;
+            --accent: #e74c3c;
+            --text-light: #ffffff;
+            --text-dim: #dfe6e9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
+
+        body {
+            background: url('https://images.unsplash.com/photo-1615937651199-a681b37b02db?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-light);
+            overflow: hidden;
+        }
+
+        body::before {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(10, 20, 40, 0.9), rgba(40, 10, 10, 0.85));
+            backdrop-filter: blur(5px);
+            z-index: -1;
+        }
+
+        .glass-container {
+            width: 95%; max-width: 1300px; height: 90vh;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        header {
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .brand h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .status-bar { font-size: 0.9rem; color: var(--success); display: flex; align-items: center; gap: 10px; }
+        .loading { color: #f1c40f; display: none; font-weight: bold; }
+
+        nav { padding: 15px 30px; display: flex; gap: 15px; background: rgba(0, 0, 0, 0.1); }
+        nav button {
+            background: transparent; border: 1px solid transparent; color: var(--text-dim);
+            padding: 12px 25px; font-size: 1rem; border-radius: 12px; cursor: pointer; transition: 0.3s ease;
+        }
+        nav button:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        nav button.active {
+            background: linear-gradient(45deg, var(--primary), #2980b9);
+            color: white; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        main { flex: 1; padding: 30px; overflow-y: auto; }
+        main::-webkit-scrollbar { width: 8px; }
+        main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+        .section { display: none; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .section.active { display: block; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .control-panel {
+            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border);
+            padding: 25px; border-radius: 16px; margin-bottom: 25px;
+            display: flex; gap: 20px; align-items: flex-end; flex-wrap: wrap;
+        }
+
+        h3 { width: 100%; margin-bottom: 15px; font-weight: 300; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .input-group { flex: 1; min-width: 200px; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 0.9rem; color: var(--text-dim); }
+        .input-group input, .input-group select {
+            width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-size: 1rem; outline: none;
+        }
+        option { background: #2c3e50; color: white; }
+
+        .btn { padding: 12px 30px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; display: flex; align-items: center; gap: 10px; transition: all 0.3s; height: 46px; }
+        .btn-primary { background: linear-gradient(45deg, #3498db, #2980b9); }
+        .btn-success { background: linear-gradient(45deg, #2ecc71, #27ae60); }
+        .btn-danger { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+
+        .table-container { background: rgba(0, 0, 0, 0.2); border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); }
+        table { width: 100%; border-collapse: collapse; }
+        thead { background: rgba(255, 255, 255, 0.05); }
+        th { padding: 18px; text-align: right; font-weight: 600; color: var(--text-dim); border-bottom: 1px solid var(--glass-border); }
+        td { padding: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: white; }
+        tr:hover { background: rgba(255, 255, 255, 0.03); }
+
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
+        .badge-green { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
+        .badge-red { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(10px);
+            z-index: 1000; display: none; justify-content: center; align-items: center;
+        }
+        .login-box {
+            background: #1e272e; border: 1px solid var(--glass-border); padding: 40px; border-radius: 20px;
+            width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: zoomIn 0.3s;
+        }
+        @keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .login-box h2 { color: white; margin-bottom: 25px; font-weight: 300; }
+        .login-box input { width: 100%; margin-bottom: 15px; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2d3436; color: white; text-align: center; }
+        .login-box button { width: 100%; margin-top: 10px; }
+
+        footer { text-align: center; font-size: 0.8rem; padding: 15px; opacity: 0.6; }
+    </style>
+</head>
+<body>
+
+    <div class="modal-overlay" id="loginModal">
+        <div class="login-box">
+            <div style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;">
+                <i class="fa-solid fa-shield-cat"></i>
+            </div>
+            <h2>التحقق الأمني</h2>
+            <p style="color:#aaa; margin-bottom: 20px; font-size:0.9rem;">أدخل الإيميل وكلمة المرور للوصول للوحة الإدارة</p>
+            <input type="email" id="adminEmail" placeholder="admin@elroby.com" value="admin@elroby.com">
+            <input type="password" id="adminPass" placeholder="كلمة المرور">
+            <button class="btn btn-primary" onclick="attemptLogin()">دخول آمن</button>
+            <button class="btn btn-danger" style="background:transparent; border:1px solid #444; margin-top:10px" onclick="closeLogin()">إلغاء</button>
+        </div>
+    </div>
+
+    <div class="glass-container">
+        <header>
+            <div class="brand">
+                <h1>الروبي <i class="fa-solid fa-drumstick-bite"></i></h1>
+            </div>
+            <div class="status-bar">
+                <span id="loading" class="loading"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                <span id="authStatus" style="font-size: 0.8rem; opacity: 0.7;">وضع الزائر (حضور فقط)</span>
+            </div>
+        </header>
+
+        <nav>
+            <button onclick="handleTabClick('attendance')" class="active" id="btn-att"><i class="fa-solid fa-calendar-check"></i> الحضور</button>
+            <button onclick="handleTabClick('employees')" id="btn-emp"><i class="fa-solid fa-lock"></i> الموظفين</button>
+            <button onclick="handleTabClick('payroll')" id="btn-pay"><i class="fa-solid fa-lock"></i> الرواتب</button>
+        </nav>
+
+        <main>
+            <div id="attendance" class="section active">
+                <div class="control-panel">
+                    <h3>تسجيل الحضور اليومي</h3>
+                    <div class="input-group"><label>اختر الموظف</label><select id="attEmpSelect"><option>جاري التحميل...</option></select></div>
+                    <div class="input-group"><label>التاريخ</label><input type="date" id="attDate"></div>
+                    <div class="input-group"><label>الحالة</label><select id="attStatus"><option value="present">حضور</option><option value="absent">غياب</option></select></div>
+                    <button class="btn btn-success" id="btnRecordAtt">تسجيل</button>
+                </div>
+                <div class="table-container">
+                    <table id="attTable">
+                        <thead><tr><th>التاريخ</th><th>الموظف</th><th>الحالة</th><th>الوقت</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="employees" class="section">
+                <div class="control-panel">
+                    <h3>إدارة الموظفين (سري)</h3>
+                    <div class="input-group"><label>الاسم</label><input type="text" id="empName"></div>
+                    <div class="input-group"><label>الوظيفة</label><input type="text" id="empRole"></div>
+                    <div class="input-group"><label>الراتب (ج.م)</label><input type="number" id="empSalary"></div>
+                    <button class="btn btn-primary" id="btnAddEmp">إضافة</button>
+                </div>
+                <div class="table-container">
+                    <table id="empTable">
+                        <thead><tr><th>الاسم</th><th>الوظيفة</th><th>الراتب</th><th>تاريخ التعيين</th><th>حذف</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- قسم الرواتب المعدل -->
+            <div id="payroll" class="section">
+                <div class="control-panel">
+                    <h3 style="display:flex; justify-content:space-between">
+                        <span>العمليات الحسابية</span>
+                        <button class="btn btn-success" onclick="exportPayroll()" style="height:35px; font-size:0.9rem"><i class="fa-solid fa-file-excel"></i> تصدير Excel</button>
+                    </h3>
+                    <div class="input-group"><label>الموظف</label><select id="payEmpSelect"></select></div>
+                    <div class="input-group"><label>النوع</label><select id="adjType"><option value="bonus">مكافأة (+)</option><option value="deduction">خصم (-)</option></select></div>
+                    <div class="input-group"><label>القيمة</label><input type="number" id="adjAmount"></div>
+                    <button class="btn btn-primary" id="btnAddAdj">تنفيذ</button>
+                </div>
+                <div class="table-container">
+                    <table id="payrollTable">
+                        <thead>
+                            <tr>
+                                <th>الموظف</th>
+                                <th>الراتب الأساسي</th>
+                                <th>أيام الحضور</th>
+                                <th style="color:var(--accent)">أيام الغياب</th> <!-- العمود الجديد -->
+                                <th>(+)</th>
+                                <th>(-)</th>
+                                <th>صافي الراتب</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payrollBody"><tr><td colspan="7" style="text-align:center; padding:30px">البيانات مشفرة. سجل دخول لعرضها.</td></tr></tbody>
+                    </table>
+                    <div style="padding:15px"><button class="btn btn-primary" onclick="calculatePayroll()">تحديث القوائم المالية</button></div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>El Roby HR System v3.0 | Secure & Glass</footer>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, getDocs, Timestamp, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWi4wOrFwJ3voEV4Ah08aOj9ZR5vE2Peo",
+            authDomain: "hr-system-7a3b3.firebaseapp.com",
+            databaseURL: "https://hr-system-7a3b3-default-rtdb.firebaseio.com",
+            projectId: "hr-system-7a3b3",
+            storageBucket: "hr-system-7a3b3.firebasestorage.app",
+            messagingSenderId: "371347696448",
+            appId: "1:371347696448:web:61f2c815ab66fc6522a8a5",
+            measurementId: "G-J4W2QQ2T0G"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let allEmployees = [];
+        let allAttendance = [];
+        let isAuthenticated = false; 
+
+        const loading = document.getElementById('loading');
+        const showLoading = () => loading.style.display = 'inline-block';
+        const hideLoading = () => loading.style.display = 'none';
+
+        window.handleTabClick = (tabId) => {
+            if (tabId === 'attendance') { showSection(tabId); return; }
+            if (isAuthenticated) { showSection(tabId); } else { document.getElementById('loginModal').style.display = 'flex'; window.targetTab = tabId; }
+        };
+        window.closeLogin = () => document.getElementById('loginModal').style.display = 'none';
+
+        window.attemptLogin = async () => {
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+            if(!email || !pass) return alert("أدخل الإيميل والباسورد");
+            showLoading();
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                isAuthenticated = true;
+                document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('authStatus').innerHTML = '<i class="fa-solid fa-user-check"></i> ' + userCredential.user.email;
+                document.getElementById('authStatus').style.color = '#2ecc71';
+                document.getElementById('btn-emp').innerHTML = '<i class="fa-solid fa-users"></i> الموظفين';
+                document.getElementById('btn-pay').innerHTML = '<i class="fa-solid fa-money-bill-wave"></i> الرواتب';
+                showSection(window.targetTab);
+            } catch (error) { alert("خطأ في الدخول: " + error.code); }
+            hideLoading();
+        };
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            if(id === 'attendance') document.getElementById('btn-att').classList.add('active');
+            if(id === 'employees') document.getElementById('btn-emp').classList.add('active');
+            if(id === 'payroll') document.getElementById('btn-pay').classList.add('active');
+        }
+
+        onSnapshot(query(collection(db, "employees"), orderBy("createdAt", "desc")), (snapshot) => {
+            allEmployees = [];
+            const selectAtt = document.getElementById('attEmpSelect');
+            const selectPay = document.getElementById('payEmpSelect');
+            const tableBody = document.querySelector('#empTable tbody');
+            selectAtt.innerHTML = '<option value="">-- اختر الموظف --</option>';
+            selectPay.innerHTML = '<option value="">-- اختر الموظف --</option>';
+            tableBody.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const emp = { id: docSnap.id, ...docSnap.data() };
+                allEmployees.push(emp);
+                selectAtt.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
+                selectPay.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
+                tableBody.innerHTML += `<tr><td style="font-weight:bold">${emp.name}</td><td>${emp.role}</td><td>${emp.salary.toLocaleString()} ج.م</td><td>${emp.hireDate}</td><td><button class="btn btn-danger" style="padding:5px 15px;height:auto" onclick="window.delEmp('${emp.id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+            });
+        });
+
+        onSnapshot(query(collection(db, "attendance"), orderBy("createdAt", "desc")), (snapshot) => {
+            allAttendance = [];
+            const tbody = document.querySelector('#attTable tbody');
+            tbody.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                const att = docSnap.data();
+                allAttendance.push(att);
+                const emp = allEmployees.find(e => e.id === att.empId);
+                const badge = att.status === 'present' ? 'badge-green' : 'badge-red';
+                tbody.innerHTML += `<tr><td>${att.date}</td><td>${emp ? emp.name : "..."}</td><td><span class="badge ${badge}">${att.status === 'present' ? 'حضور' : 'غياب'}</span></td><td style="font-size:0.8rem;opacity:0.7">${att.createdAt.toDate().toLocaleTimeString('ar-EG')}</td></tr>`;
+            });
+        });
+
+        document.getElementById('btnAddEmp').addEventListener('click', async () => {
+            const name = document.getElementById('empName').value;
+            const salary = document.getElementById('empSalary').value;
+            const role = document.getElementById('empRole').value;
+            if(!name || !salary) return alert("اكمل البيانات");
+            await addDoc(collection(db, "employees"), { name, role, salary: Number(salary), hireDate: new Date().toLocaleDateString('ar-EG'), createdAt: Timestamp.now() });
+            alert("تم الحفظ"); document.getElementById('empName').value=''; document.getElementById('empSalary').value='';
+        });
+
+        window.delEmp = async (id) => { if(confirm("حذف؟")) await deleteDoc(doc(db, "employees", id)); }
+
+        document.getElementById('btnRecordAtt').addEventListener('click', async () => {
+            const empId = document.getElementById('attEmpSelect').value;
+            const date = document.getElementById('attDate').value;
+            const status = document.getElementById('attStatus').value;
+            if(!empId || !date) return alert("البيانات ناقصة");
+            await addDoc(collection(db, "attendance"), { empId, date, status, createdAt: Timestamp.now() });
+            alert("تم التسجيل");
+        });
+
+        document.getElementById('btnAddAdj').addEventListener('click', async () => {
+            const empId = document.getElementById('payEmpSelect').value;
+            const amount = document.getElementById('adjAmount').value;
+            const type = document.getElementById('adjType').value;
+            if(!empId || !amount) return alert("البيانات ناقصة");
+            await addDoc(collection(db, "adjustments"), { empId, type, amount: Number(amount), date: new Date().toISOString() });
+            alert("تمت العملية");
+        });
+
+        // --- تعديل دالة الحساب لإظهار الغياب ---
+        window.calculatePayroll = async () => {
+            const tbody = document.getElementById('payrollBody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">جاري الحساب...</td></tr>';
+            
+            const adjSnap = await getDocs(collection(db, "adjustments"));
+            let adjustments = []; adjSnap.forEach(d => adjustments.push(d.data()));
+            tbody.innerHTML = '';
+            
+            allEmployees.forEach(emp => {
+                // حساب أيام الحضور
+                const empAttPresent = allAttendance.filter(a => a.empId === emp.id && a.status === 'present');
+                const daysPresent = empAttPresent.length;
+                
+                // حساب أيام الغياب (الجديد)
+                const empAttAbsent = allAttendance.filter(a => a.empId === emp.id && a.status === 'absent');
+                const daysAbsent = empAttAbsent.length;
+
+                const dailyRate = emp.salary / 30; // قيمة اليوم الواحد
+                
+                const empAdjs = adjustments.filter(a => a.empId === emp.id);
+                const bonus = empAdjs.filter(a => a.type === 'bonus').reduce((s, a) => s + a.amount, 0);
+                const deduc = empAdjs.filter(a => a.type === 'deduction').reduce((s, a) => s + a.amount, 0);
+                
+                // المعادلة: (راتب اليوم * أيام الحضور) + المكافآت - الخصومات
+                // ملاحظة: أيام الغياب لا تدخل في المعادلة كـ "جمع" ولكنها خصمت تلقائياً لأننا حسبنا بناء على أيام الحضور فقط
+                const total = (dailyRate * daysPresent) + bonus - deduc;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${emp.name}</td>
+                        <td>${emp.salary.toLocaleString()}</td>
+                        <td>${daysPresent}</td>
+                        <td style="color:var(--accent); font-weight:bold">${daysAbsent}</td> <!-- عمود الغياب -->
+                        <td style="color:#2ecc71">+${bonus}</td>
+                        <td style="color:#e74c3c">-${deduc}</td>
+                        <td style="font-weight:bold;color:#f1c40f;font-size:1.1rem">${Math.round(total).toLocaleString()} ج.م</td>
+                    </tr>
+                `;
+            });
+        };
+
+        window.exportPayroll = () => {
+            const wb = XLSX.utils.table_to_book(document.getElementById('payrollTable'), {sheet:"الرواتب"});
+            XLSX.writeFile(wb, "الروبي_كشف_رواتب.xlsx");
+        };
+
+        document.getElementById('attDate').valueAsDate = new Date();
+    </script>
+</body>
+</html>

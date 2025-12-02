@@ -6,198 +6,68 @@
     <title>نظام الروبي | للموارد البشرية</title>
     <link rel="icon" href="https://pps.whatsapp.net/v/t61.24694-24/491837277_975255798065507_888456427333343564_n.jpg?ccb=11-4&oh=01_Q5Aa3AGbSm6G-sE8jIgjSx6QlkI7NJYu9I2N-wkffkMFp-7qRA&oe=69317C7B&_nc_sid=5e03e0&_nc_cat=108" type="image/png">
     
-    <!-- خطوط وأيقونات -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- مكتبة الإكسيل -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            --primary: #3498db;
-            --accent: #e74c3c;
-            --text-light: #ffffff;
-            --text-dim: #dfe6e9;
-        }
-
+        /* نفس التنسيقات السابقة تماماً دون تغيير */
+        :root { --glass-bg: rgba(255, 255, 255, 0.1); --glass-border: rgba(255, 255, 255, 0.2); --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); --primary: #3498db; --accent: #e74c3c; --text-light: #ffffff; --text-dim: #dfe6e9; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-
-        body {
-            background: url('https://images.unsplash.com/photo-1615937651199-a681b37b02db?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-light);
-            /* تم السماح بالسكرول في الموبايل */
-            overflow-x: hidden; 
-        }
-
-        body::before {
-            content: ''; position: absolute; inset: 0;
-            background: linear-gradient(135deg, rgba(10, 20, 40, 0.9), rgba(40, 10, 10, 0.85));
-            backdrop-filter: blur(5px);
-            z-index: -1;
-        }
-
-        .glass-container {
-            width: 95%; max-width: 1300px; 
-            /* تعديل الارتفاع ليكون مرناً مع الموبايل */
-            height: 90vh;
-            max-height: 90vh;
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            box-shadow: var(--glass-shadow);
-            display: flex; flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* الهيدر */
-        header {
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--glass-border);
-            display: flex; justify-content: space-between; align-items: center;
-            background: rgba(0, 0, 0, 0.2);
-        }
-
+        body { background: url('https://images.unsplash.com/photo-1615937651199-a681b37b02db?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); background-size: cover; background-position: center; background-attachment: fixed; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text-light); overflow-x: hidden; }
+        body::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(10, 20, 40, 0.9), rgba(40, 10, 10, 0.85)); backdrop-filter: blur(5px); z-index: -1; }
+        .glass-container { width: 95%; max-width: 1300px; height: 90vh; max-height: 90vh; background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 24px; box-shadow: var(--glass-shadow); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        header { padding: 15px 20px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.2); }
         .brand h1 { font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .status-bar { font-size: 0.8rem; color: var(--success); display: flex; align-items: center; gap: 8px; }
         .loading { color: #f1c40f; display: none; font-weight: bold; }
-
-        /* القائمة العلوية */
-        nav { 
-            padding: 10px 20px; 
-            display: flex; gap: 10px; 
-            background: rgba(0, 0, 0, 0.1); 
-            overflow-x: auto; /* سكرول أفقي للأزرار في الموبايل */
-            white-space: nowrap;
-        }
-        
+        nav { padding: 10px 20px; display: flex; gap: 10px; background: rgba(0, 0, 0, 0.1); overflow-x: auto; white-space: nowrap; }
         nav::-webkit-scrollbar { height: 4px; }
         nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 2px; }
-
-        nav button {
-            background: transparent; border: 1px solid transparent; color: var(--text-dim);
-            padding: 10px 20px; font-size: 0.95rem; border-radius: 12px; cursor: pointer; transition: 0.3s ease;
-            flex-shrink: 0; /* منع انكماش الأزرار */
-        }
+        nav button { background: transparent; border: 1px solid transparent; color: var(--text-dim); padding: 10px 20px; font-size: 0.95rem; border-radius: 12px; cursor: pointer; transition: 0.3s ease; flex-shrink: 0; }
         nav button:hover { background: rgba(255, 255, 255, 0.1); color: white; }
-        nav button.active {
-            background: linear-gradient(45deg, var(--primary), #2980b9);
-            color: white; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        /* المحتوى الرئيسي */
+        nav button.active { background: linear-gradient(45deg, var(--primary), #2980b9); color: white; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4); border: 1px solid rgba(255,255,255,0.2); }
         main { flex: 1; padding: 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         main::-webkit-scrollbar { width: 6px; }
         main::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
-
         .section { display: none; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         .section.active { display: block; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* لوحة التحكم */
-        .control-panel {
-            background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border);
-            padding: 20px; border-radius: 16px; margin-bottom: 20px;
-            display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;
-        }
-
+        .control-panel { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); padding: 20px; border-radius: 16px; margin-bottom: 20px; display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
         h3 { width: 100%; margin-bottom: 15px; font-weight: 300; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; font-size: 1.1rem; }
-        
         .input-group { flex: 1; min-width: 200px; }
         .input-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--text-dim); }
-        .input-group input, .input-group select {
-            width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-size: 1rem; outline: none;
-        }
+        .input-group input, .input-group select { width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); border-radius: 8px; color: white; font-size: 1rem; outline: none; }
         option { background: #2c3e50; color: white; }
-
         .btn { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; color: white; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; height: 46px; }
         .btn-primary { background: linear-gradient(45deg, #3498db, #2980b9); }
         .btn-success { background: linear-gradient(45deg, #2ecc71, #27ae60); }
         .btn-danger { background: linear-gradient(45deg, #e74c3c, #c0392b); }
         .btn:active { transform: scale(0.98); }
-
-        /* الجداول */
-        .table-container { 
-            background: rgba(0, 0, 0, 0.2); border-radius: 16px; 
-            border: 1px solid var(--glass-border);
-            /* تمكين السكرول الأفقي للجداول في الموبايل */
-            overflow-x: auto; 
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        table { width: 100%; border-collapse: collapse; min-width: 600px; /* ضمان عرض أدنى للجدول */ }
+        .table-container { background: rgba(0, 0, 0, 0.2); border-radius: 16px; border: 1px solid var(--glass-border); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
         thead { background: rgba(255, 255, 255, 0.05); }
         th { padding: 15px; text-align: right; font-weight: 600; color: var(--text-dim); border-bottom: 1px solid var(--glass-border); white-space: nowrap; }
         td { padding: 12px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: white; white-space: nowrap; }
         tr:hover { background: rgba(255, 255, 255, 0.03); }
-
         .badge { padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: bold; }
         .badge-green { background: rgba(46, 204, 113, 0.2); color: #2ecc71; border: 1px solid #2ecc71; }
         .badge-red { background: rgba(231, 76, 60, 0.2); color: #e74c3c; border: 1px solid #e74c3c; }
-
-        /* نافذة الدخول */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px);
-            z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px;
-        }
-        .login-box {
-            background: #1e272e; border: 1px solid var(--glass-border); padding: 30px; border-radius: 20px;
-            width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
-        }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(10px); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .login-box { background: #1e272e; border: 1px solid var(--glass-border); padding: 30px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
         .login-box input { margin-bottom: 12px; }
-
         footer { text-align: center; font-size: 0.75rem; padding: 15px; opacity: 0.6; }
-
-        /* --- تحسينات الموبايل (Media Queries) --- */
+        
+        /* تحسينات الموبايل */
         @media (max-width: 768px) {
-            .glass-container {
-                width: 100%;
-                height: 100vh; /* ملء الشاشة بالكامل */
-                max-height: 100vh;
-                border-radius: 0; /* إزالة الحواف الدائرية */
-                border: none;
-            }
-
-            header {
-                flex-direction: column;
-                gap: 10px;
-                text-align: center;
-            }
-
+            .glass-container { width: 100%; height: 100vh; max-height: 100vh; border-radius: 0; border: none; }
+            header { flex-direction: column; gap: 10px; text-align: center; }
             .brand h1 { font-size: 1.3rem; }
-
-            /* تحسين لوحة التحكم للموبايل */
-            .control-panel {
-                gap: 10px;
-                padding: 15px;
-            }
-
-            .input-group {
-                min-width: 100%; /* جعل الحقول تأخذ سطر كامل */
-            }
-
-            .btn {
-                width: 100%; /* زر بعرض كامل */
-                margin-top: 5px;
-            }
-
-            /* تحسين الجدول */
+            .control-panel { gap: 10px; padding: 15px; }
+            .input-group { min-width: 100%; }
+            .btn { width: 100%; margin-top: 5px; }
             th, td { padding: 10px; font-size: 0.9rem; }
-            
-            nav { justify-content: flex-start; } /* بداية القائمة من اليمين */
+            nav { justify-content: flex-start; }
         }
     </style>
 </head>
@@ -235,6 +105,7 @@
         </nav>
 
         <main>
+            <!-- قسم الحضور -->
             <div id="attendance" class="section active">
                 <div class="control-panel">
                     <h3>تسجيل الحضور اليومي</h3>
@@ -251,6 +122,7 @@
                 </div>
             </div>
 
+            <!-- قسم الموظفين -->
             <div id="employees" class="section">
                 <div class="control-panel">
                     <h3>إدارة الموظفين (سري)</h3>
@@ -267,39 +139,54 @@
                 </div>
             </div>
 
-            <!-- قسم الرواتب المعدل -->
+            <!-- قسم الرواتب (تم التعديل عليه هنا) -->
             <div id="payroll" class="section">
                 <div class="control-panel">
                     <h3 style="display:flex; justify-content:space-between; flex-wrap: wrap; gap:10px;">
                         <span>العمليات الحسابية</span>
                         <button class="btn btn-success" onclick="exportPayroll()" style="height:35px; font-size:0.8rem; padding: 0 15px;"><i class="fa-solid fa-file-excel"></i> تصدير Excel</button>
                     </h3>
+                    
+                    <!-- خانة الشهر الجديدة -->
+                    <div class="input-group" style="border: 1px solid var(--accent); padding: 5px; border-radius: 8px;">
+                        <label style="color:var(--accent)">اختر شهر القبض</label>
+                        <input type="month" id="targetMonth" style="font-weight:bold;">
+                    </div>
+
                     <div class="input-group"><label>الموظف</label><select id="payEmpSelect"></select></div>
                     <div class="input-group"><label>النوع</label><select id="adjType"><option value="bonus">مكافأة (+)</option><option value="deduction">خصم (-)</option></select></div>
                     <div class="input-group"><label>القيمة</label><input type="number" id="adjAmount"></div>
-                    <button class="btn btn-primary" id="btnAddAdj">تنفيذ</button>
+                    <button class="btn btn-primary" id="btnAddAdj">تنفيذ العملية</button>
                 </div>
+
                 <div class="table-container">
                     <table id="payrollTable">
                         <thead>
                             <tr>
                                 <th>الموظف</th>
-                                <th>الراتب الأساسي</th>
-                                <th>أيام الحضور</th>
-                                <th style="color:var(--accent)">أيام الغياب</th>
+                                <th>الأساسي</th>
+                                <th>حضور (أيام)</th>
+                                <th style="color:var(--accent)">غياب (أيام)</th>
                                 <th>(+)</th>
                                 <th>(-)</th>
-                                <th>صافي الراتب</th>
+                                <th>الصافي المستحق</th>
                             </tr>
                         </thead>
-                        <tbody id="payrollBody"><tr><td colspan="7" style="text-align:center; padding:30px">البيانات مشفرة. سجل دخول لعرضها.</td></tr></tbody>
+                        <tbody id="payrollBody">
+                            <tr><td colspan="7" style="text-align:center; padding:30px">البيانات مشفرة. سجل دخول وحدد الشهر لعرضها.</td></tr>
+                        </tbody>
                     </table>
-                    <div style="padding:15px"><button class="btn btn-primary" onclick="calculatePayroll()">تحديث القوائم المالية</button></div>
+                    <!-- زر التحديث -->
+                    <div style="padding:15px">
+                        <button class="btn btn-primary" onclick="calculatePayroll()">
+                            <i class="fa-solid fa-calculator"></i> احسب رواتب الشهر المحدد
+                        </button>
+                    </div>
                 </div>
             </div>
         </main>
         
-        <footer>El Roby HR System v3.0 Mobile Ready</footer>
+        <footer>El Roby HR System v3.5 | Secure & Monthly Filtered</footer>
     </div>
 
     <script type="module">
@@ -329,6 +216,11 @@
         const loading = document.getElementById('loading');
         const showLoading = () => loading.style.display = 'inline-block';
         const hideLoading = () => loading.style.display = 'none';
+
+        // تعيين الشهر الحالي تلقائياً عند الفتح
+        const currentData = new Date();
+        const monthStr = currentData.toISOString().slice(0, 7); // يرجع YYYY-MM
+        document.getElementById('targetMonth').value = monthStr;
 
         window.handleTabClick = (tabId) => {
             if (tabId === 'attendance') { showSection(tabId); return; }
@@ -422,26 +314,40 @@
             alert("تمت العملية");
         });
 
+        // ----------------------------------------------------
+        // أهم دالة: حساب الرواتب مع فلتر الشهر
+        // ----------------------------------------------------
         window.calculatePayroll = async () => {
             const tbody = document.getElementById('payrollBody');
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">جاري الحساب...</td></tr>';
+            const targetMonth = document.getElementById('targetMonth').value; // مثلاً "2023-10"
+
+            if(!targetMonth) return alert("الرجاء اختيار الشهر أولاً!");
+
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">جاري الحساب لشهر '+ targetMonth +'...</td></tr>';
             
+            // جلب كل التعديلات (المكافآت والخصومات)
             const adjSnap = await getDocs(collection(db, "adjustments"));
-            let adjustments = []; adjSnap.forEach(d => adjustments.push(d.data()));
+            let allAdjustments = []; 
+            adjSnap.forEach(d => allAdjustments.push(d.data()));
+
             tbody.innerHTML = '';
             
             allEmployees.forEach(emp => {
-                const empAttPresent = allAttendance.filter(a => a.empId === emp.id && a.status === 'present');
-                const daysPresent = empAttPresent.length;
-                const empAttAbsent = allAttendance.filter(a => a.empId === emp.id && a.status === 'absent');
-                const daysAbsent = empAttAbsent.length;
+                // 1. فلترة الحضور لهذا الشهر فقط
+                // نقارن بداية تاريخ الحضور (مثلاً 2023-10-05) مع الشهر المحدد (2023-10)
+                const monthlyAttendance = allAttendance.filter(a => a.date.startsWith(targetMonth) && a.empId === emp.id);
 
+                const daysPresent = monthlyAttendance.filter(a => a.status === 'present').length;
+                const daysAbsent = monthlyAttendance.filter(a => a.status === 'absent').length;
+
+                // 2. فلترة المكافآت والخصومات لهذا الشهر فقط
+                const monthlyAdjs = allAdjustments.filter(a => a.empId === emp.id && a.date.startsWith(targetMonth));
+                
+                const bonus = monthlyAdjs.filter(a => a.type === 'bonus').reduce((s, a) => s + a.amount, 0);
+                const deduc = monthlyAdjs.filter(a => a.type === 'deduction').reduce((s, a) => s + a.amount, 0);
+
+                // 3. الحساب
                 const dailyRate = emp.salary / 30; 
-                
-                const empAdjs = adjustments.filter(a => a.empId === emp.id);
-                const bonus = empAdjs.filter(a => a.type === 'bonus').reduce((s, a) => s + a.amount, 0);
-                const deduc = empAdjs.filter(a => a.type === 'deduction').reduce((s, a) => s + a.amount, 0);
-                
                 const total = (dailyRate * daysPresent) + bonus - deduc;
 
                 tbody.innerHTML += `
@@ -459,8 +365,9 @@
         };
 
         window.exportPayroll = () => {
+            const targetMonth = document.getElementById('targetMonth').value;
             const wb = XLSX.utils.table_to_book(document.getElementById('payrollTable'), {sheet:"الرواتب"});
-            XLSX.writeFile(wb, "الروبي_كشف_رواتب.xlsx");
+            XLSX.writeFile(wb, "الروبي_رواتب_"+targetMonth+".xlsx");
         };
 
         document.getElementById('attDate').valueAsDate = new Date();
